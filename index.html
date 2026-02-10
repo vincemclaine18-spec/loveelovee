@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Message For My Love</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --baby-blue: #a2d2ff;
+      --valentine-red: #ff4d6d;
+    }
+
+    body {
+      margin: 0; padding: 0;
+      display: flex; justify-content: center; align-items: center;
+      height: 100vh;
+      background: radial-gradient(circle, #ffb3c1 0%, #ff85a1 35%, var(--baby-blue) 100%);
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      perspective: 1500px;
+      overflow: hidden;
+    }
+
+    .book { position: relative; width: 350px; height: 480px; transform-style: preserve-3d; z-index: 5; }
+    
+    .page { 
+      position: absolute; width: 100%; height: 100%; top: 0; left: 0; 
+      transform-origin: left; transform-style: preserve-3d; 
+      transition: transform 1.2s cubic-bezier(0.645, 0.045, 0.355, 1); 
+      box-shadow: 5px 5px 25px rgba(0,0,0,0.15); 
+      backface-visibility: hidden; 
+    }
+    
+    .front, .back {
+      position: absolute;
+      width: 100%; height: 100%;
+      padding: 30px;
+      box-sizing: border-box;
+      display: flex; flex-direction: column;
+      backface-visibility: hidden;
+      border-radius: 0 15px 15px 0;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-color: var(--baby-blue);
+    }
+
+    .front { align-items: center; z-index: 2; }
+    .back { 
+        background: #fdfdfd; transform: rotateY(180deg); z-index: 1; border-radius: 15px 0 0 15px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M20 10c-2 0-4 2-4 5s2 7 4 7 4-4 4-7-2-5-4-5zm-2 15c0 3 2 5 2 5s2-2 2-5h-4z' fill='%23a2d2ff' fill-opacity='0.4'/%3E%3C/svg%3E");
+    }
+
+    .page-flipped { transform: rotateY(-180deg); }
+    h2 { color: white; font-size: 1.6rem; text-shadow: 2px 2px 8px rgba(0,0,0,0.6); margin-top: 10px; text-align: center; }
+    
+    .message-container {
+      overflow-y: auto; max-height: 100%; text-align: center;
+      background: rgba(162, 210, 255, 0.7); padding: 15px; border-radius: 15px; backdrop-filter: blur(3px);
+    }
+    .message-container::-webkit-scrollbar { width: 3px; }
+    .message-container::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
+
+    p { line-height: 1.5; color: white; font-weight: bold; font-size: 0.95rem; text-shadow: 1px 1px 4px rgba(0,0,0,0.5); }
+
+    button {
+      padding: 15px 30px; background: var(--valentine-red); color: white; border: none;
+      border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 1rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-top: auto; margin-bottom: 10px;
+    }
+
+    .btn-wrap { position: relative; width: 100%; height: 100px; margin-top: auto; margin-bottom: 20px; }
+    #no-btn { background: #adb5bd; position: absolute; left: 50%; transform: translateX(-50%); transition: all 0.1s ease-out; }
+
+    .character {
+      position: fixed; bottom: 10px; width: 220px; height: auto; z-index: 10;
+      opacity: 0; transform: scale(0); object-fit: contain;
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease-out;
+    }
+    #char-left { left: 2%; }
+    #char-right { right: 2%; }
+    .show-char { opacity: 1; transform: scale(1); animation: bob 3.5s ease-in-out infinite 0.6s; }
+
+    @keyframes bob { 0%, 100% { transform: scale(1) translateY(0); } 50% { transform: scale(1) translateY(-20px); } }
+
+    .balloon {
+      position: absolute; bottom: -150px; width: 60px; height: 75px;
+      background: var(--baby-blue); border-radius: 50%; opacity: 0.8; z-index: 10;
+      animation: floatUp 4s ease-in forwards;
+    }
+    .balloon::after { content: ""; position: absolute; bottom: -40px; left: 50%; width: 2px; height: 40px; background: rgba(255,255,255,0.7); }
+    @keyframes floatUp { to { transform: translateY(-120vh) translateX(50px); opacity: 0; } }
+  </style>
+</head>
+<body>
+
+  <img id="char-left" class="character">
+  <img id="char-right" class="character">
+
+  <div class="book">
+    <div class="page" id="p1" style="z-index: 4;">
+      <div class="front" id="bg-p1">
+        <button onclick="flip(1)">See what's inside</button>
+      </div>
+      <div class="back"></div>
+    </div>
+
+    <div class="page" id="p2" style="z-index: 3;">
+      <div class="front" id="bg-p2" style="align-items: flex-start;">
+        <h2 id="text-p2-head"></h2>
+        <p id="text-p2-sub"></p>
+        <button onclick="flip(2)">Press me</button>
+      </div>
+      <div class="back"></div>
+    </div>
+
+    <div class="page" id="p3" style="z-index: 2;">
+      <div class="front" id="bg-p3">
+        <h2 id="text-p3-head"></h2>
+        <div class="btn-wrap">
+          <button onclick="celebrate()">YES! 💕</button>
+          <button id="no-btn" onmouseover="moveNo()" onclick="moveNo()">No</button>
+        </div>
+      </div>
+      <div class="back"></div>
+    </div>
+
+    <div class="page" id="p4" style="z-index: 1;">
+      <div class="front" id="bg-p4">
+        <div class="message-container" id="final-letter"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const config = {
+      images: {
+        cover: "cover.jpg",
+        page2: "page2.jpg",
+        page3: "page3.jpg",
+        page4: "page4.jpg",
+        leftCharacter: "left-char.png",
+        rightCharacter: "right-char.png"
+      },
+      page2Title: "", 
+      page2SubText: "", 
+      page3Question: "",
+      letterHTML: `
+        <h2>To My Love</h2>
+        <p>I wanted to take a moment today to tell you how lucky i feel to have you in my life love. Sometimes i don't say it enough, but i am so incredibly thankful for you po.</p>
+        <p>When i look back at my favorite moments lately, you’re in all of them. I’m grateful for the way you make me laugh, the way you listen when I’m having a long day, and just the way things feel easier when you’re around.</p>
+        <p>You aren't just someone i'm dating babb, you're my favorite person to talk to and the best part of my day.</p>
+        <p>Thank you for being exactly who you are and thank you also for choosing to spend your time with me. It means more to me than i can really put into words.</p>
+        <p style="color: #ff4d6d; background: white; padding: 10px 20px; border-radius: 25px; display: inline-block;">Happy Valentine’s Day My Love. I’m so glad i get to call you mine. 💙</p>
+      `
+    };
+
+    document.getElementById('bg-p1').style.backgroundImage = `url(${config.images.cover})`;
+    document.getElementById('bg-p2').style.backgroundImage = `url(${config.images.page2})`;
+    document.getElementById('bg-p3').style.backgroundImage = `url(${config.images.page3})`;
+    document.getElementById('bg-p4').style.backgroundImage = `url(${config.images.page4})`;
+    document.getElementById('char-left').src = config.images.leftCharacter;
+    document.getElementById('char-right').src = config.images.rightCharacter;
+    document.getElementById('text-p2-head').innerText = config.page2Title;
+    document.getElementById('text-p2-sub').innerText = config.page2SubText;
+    document.getElementById('text-p3-head').innerText = config.page3Question;
+    document.getElementById('final-letter').innerHTML = config.letterHTML;
+
+    function flip(n) { document.getElementById('p' + n).classList.add('page-flipped'); }
+    function createBalloon() {
+      const b = document.createElement("div"); b.className = "balloon";
+      b.style.left = Math.random() * 100 + "vw";
+      b.style.backgroundColor = Math.random() > 0.5 ? "#a2d2ff" : "#7fb6e1";
+      document.body.appendChild(b); setTimeout(() => b.remove(), 4000);
+    }
+    function celebrate() {
+      flip(3);
+      document.getElementById('char-left').classList.add('show-char');
+      document.getElementById('char-right').classList.add('show-char');
+      for(let i=0; i<15; i++) { setTimeout(createBalloon, i * 150); }
+      const duration = 5000; const end = Date.now() + duration;
+      const interval = setInterval(function() {
+        if (Date.now() > end) return clearInterval(interval);
+        confetti({ particleCount: 40, spread: 360, origin: { x: Math.random(), y: Math.random() - 0.2 }, colors: ['#a2d2ff', '#ffffff', '#7fb6e1'] });
+      }, 250);
+    }
+    function moveNo() {
+      const btn = document.getElementById('no-btn');
+      const x = Math.random() * 300 - 150; const y = Math.random() * 150 - 75;
+      btn.style.transform = `translateX(-50%) translate(${x}px, ${y}px)`;
+    }
+  </script>
+</body>
+</html>
